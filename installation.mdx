@@ -1,0 +1,279 @@
+---
+title: Installation
+description: Complete installation guide for the mac9sb/config development environment
+---
+
+## Prerequisites
+
+<Note>
+  This setup script is designed exclusively for macOS. The script includes a check that will exit if run on other operating systems.
+</Note>
+
+Before you begin, ensure you have:
+
+- **macOS**: Any recent version of macOS (the script checks with `uname -s`)
+- **Internet Connection**: Required for downloading Homebrew, packages, and the config repository
+- **Admin Access**: Needed for installing Xcode Command Line Tools and enabling Touch ID for sudo
+
+## Installation Methods
+
+### Method 1: Clone and Run (Recommended)
+
+This method gives you the most control and allows you to inspect the setup script before running it.
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/mac9sb/config.git ~/.config
+    ```
+  </Step>
+
+  <Step title="Navigate to the config directory">
+    ```bash
+    cd ~/.config
+    ```
+  </Step>
+
+  <Step title="Run the setup script">
+    ```bash
+    ./setup.sh
+    ```
+  </Step>
+</Steps>
+
+### Method 2: One-Line Installation
+
+For a quick installation, you can run the setup script directly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mac9sb/config/main/setup.sh | sh
+```
+
+<Warning>
+  This method downloads and executes the script in one step. Always review scripts before running them with curl piping.
+</Warning>
+
+## What Gets Installed
+
+The setup script performs the following operations in sequence:
+
+### 1. Xcode Command Line Tools
+
+```bash setup.sh:52-62
+install_xcode_clt() {
+  if xcode-select -p >/dev/null 2>&1; then
+    log "Xcode Command Line Tools: already installed"
+    return 0
+  fi
+
+  log "Installing Xcode Command Line Tools (a GUI prompt will appear)..."
+  xcode-select --install >/dev/null 2>&1 || true
+  log "Re-run this script after the CLT installation finishes."
+  exit 0
+}
+```
+
+If not already installed, a GUI prompt will appear. You'll need to complete this installation and re-run the script.
+
+### 2. Config Repository Setup
+
+The script clones the config repository to `~/.config` and creates symbolic links for all dotfiles:
+
+```bash setup.sh:39-49
+symlink_home_dotfiles() {
+  for file in "$CONFIG_DIR"/.*; do
+    [ -f "$file" ] || continue
+    filename="$(basename "$file")"
+    case "$filename" in
+    . | ..) continue ;;
+    .git) continue ;;
+    *) ln -sf "$file" "$HOME/$filename" ;;
+    esac
+  done
+}
+```
+
+This creates symlinks for:
+- `.zshrc` - Shell configuration
+- `.gitconfig` - Git settings
+- `.vimrc` - Vim configuration
+- `.gitignore` - Global gitignore patterns
+
+### 3. Touch ID for sudo
+
+Enables Touch ID authentication for sudo commands by configuring `/etc/pam.d/sudo_local`:
+
+```bash setup.sh:65-86
+enable_touchid_for_sudo() {
+  template="/etc/pam.d/sudo_local.template"
+  target="/etc/pam.d/sudo_local"
+
+  if [ ! -f "$template" ]; then
+    log "Touch ID: $template not found; skipping"
+    return 0
+  fi
+
+  if [ -f "$target" ] && grep -q '^[[:space:]]*auth[[:space:]]\+sufficient[[:space:]]\+pam_tid\.so' "$target" 2>/dev/null; then
+    log "Touch ID: already enabled (sudo_local)"
+    return 0
+  fi
+
+  log "Enabling Touch ID for sudo (requires sudo)..."
+  if sudo cp "$template" "$target" &&
+    sudo sed -i "" "s/^[[:space:]]*#auth[[:space:]]\\+sufficient[[:space:]]\\+pam_tid\\.so/auth       sufficient     pam_tid.so/" "$target"; then
+    log "Touch ID: enabled successfully"
+  else
+    warn "Touch ID modification failed (continuing)"
+  fi
+}
+```
+
+### 4. Homebrew Installation
+
+Installs Homebrew package manager if not already present:
+
+```bash setup.sh:89-97
+install_brew_if_missing() {
+  if command -v brew >/dev/null 2>&1; then
+    log "Homebrew: already installed"
+    return 0
+  fi
+
+  log "Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://brew.sh/install)"
+}
+```
+
+### 5. Homebrew Bundle
+
+Installs all packages defined in the Brewfile:
+
+<Accordion title="View complete Brewfile">
+  ```ruby Brewfile
+  # ——— Formulae  ———
+  brew "deno"
+  brew "fswatch"
+  brew "gh"
+  brew "mas"
+  brew "mosh"
+  brew "starship"
+
+  # ——— Casks  ———
+  cask "claude-code"
+  cask "codex"
+  cask "crossover"
+  cask "font-sf-mono-nerd-font-ligaturized"
+  cask "steam"
+  cask "zed"
+
+  # ——— Apps  ———
+  mas "Wipr 2", id: 1662217862
+  mas "Xcode", id: 497799835
+  mas "Logic Pro", id: 634148309
+  mas "Final Cut Pro", id: 424389933
+  mas "Pixelmator Pro", id: 1289583905
+  mas "Motion", id: 434290957
+  mas "Mainstage", id: 634159523
+  mas "Keynote", id: 361285480
+  mas "Pages", id: 361309726
+  mas "Numbers", id: 361304891
+  mas "Compressor", id: 424390742
+  ```
+</Accordion>
+
+**Command Line Tools:**
+- `deno` - Modern JavaScript/TypeScript runtime
+- `fswatch` - File system monitoring
+- `gh` - GitHub CLI
+- `mas` - Mac App Store CLI
+- `mosh` - Mobile shell
+- `starship` - Shell prompt
+
+**Applications (Casks):**
+- Zed, Claude Code, Codex (Development)
+- CrossOver (Compatibility)
+- SF Mono Nerd Font (Typography)
+- Steam (Gaming)
+
+**Mac App Store Apps:**
+- Professional suite: Final Cut Pro, Logic Pro, Motion, Compressor, Mainstage
+- Productivity: Keynote, Pages, Numbers
+- Development: Xcode
+- Utilities: Wipr 2, Pixelmator Pro
+
+## Verification
+
+After installation completes, verify your setup:
+
+<CodeGroup>
+```bash Check Homebrew
+brew --version
+```
+
+```bash Check installed formulae
+brew list
+```
+
+```bash Check shell configuration
+cat ~/.zshrc
+```
+
+```bash Check Git configuration
+git config --list
+```
+</CodeGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Xcode Command Line Tools installation fails">
+    If the GUI prompt doesn't appear or installation fails:
+    
+    ```bash
+    xcode-select --reset
+    xcode-select --install
+    ```
+    
+    Then re-run the setup script after installation completes.
+  </Accordion>
+
+  <Accordion title="Homebrew installation hangs">
+    Check your internet connection and ensure you have admin privileges. You can also install Homebrew manually:
+    
+    ```bash
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    ```
+  </Accordion>
+
+  <Accordion title="Script fails with permission errors">
+    Ensure you're not running the script with sudo. The script will request elevated privileges only when needed:
+    
+    ```bash
+    # Don't do this
+    sudo ./setup.sh
+    
+    # Do this instead
+    ./setup.sh
+    ```
+  </Accordion>
+
+  <Accordion title="Config directory already exists">
+    If `~/.config` already exists and isn't a git repository, the script will exit with an error. Either:
+    
+    1. Backup and remove the existing directory:
+       ```bash
+       mv ~/.config ~/.config.backup
+       ```
+    
+    2. Or clone to a different location and manually merge configurations
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Once installation is complete:
+
+1. Restart your terminal to load the new shell configuration
+2. Check out the [Quick Start](/quickstart) guide for next steps
+3. Customize the configuration files to match your preferences
+4. Explore the [Configuration](/config/shell) documentation to learn about customization options

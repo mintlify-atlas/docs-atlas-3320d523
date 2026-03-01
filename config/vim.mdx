@@ -1,0 +1,251 @@
+---
+title: Vim Configuration
+description: Vim editor settings for syntax highlighting, indentation, search, UI preferences, and key mappings
+---
+
+The Vim configuration (`.vimrc`) provides a modern, minimal setup optimized for code editing with sensible defaults for indentation, search, and UI.
+
+## Overview
+
+The configuration covers:
+- Core Vim settings and file handling
+- Indentation and editing behavior
+- Search configuration
+- UI preferences with line numbers
+- File completion settings
+- Filetype-specific behavior
+- Custom key mappings
+
+## Configuration File
+
+<CodeGroup>
+```vim .vimrc (Complete)
+" Core
+let g:is_posix = 1
+let g:netrw_liststyle = 3
+syntax enable
+
+" File I/O / Reloading
+set autoread
+
+" Editing
+set expandtab
+set shiftwidth=2
+set smartindent
+set tabstop=2
+
+" Search
+set hlsearch
+set ignorecase
+set incsearch
+set re=0
+
+" UI
+set nowrap
+set number
+set relativenumber
+set signcolumn=no
+
+" Completion
+set path+=**
+set wildignore+=*.o,*.obj,.git,*.pyc,*.swp,DS_Store,.build
+set wildmenu
+set wildmode=longest:full,full
+
+" Filetype Behavior
+autocmd FileType markdown setlocal wrap
+
+" Clear search highlight when pressing Escape
+nnoremap <silent> <C-[> :nohlsearch<CR><C-[>
+nnoremap <silent> <Esc> :nohlsearch<CR><Esc>
+```
+</CodeGroup>
+
+## Core Settings
+
+### POSIX and File Browser
+
+```vim
+let g:is_posix = 1
+let g:netrw_liststyle = 3
+syntax enable
+```
+
+<AccordionGroup>
+  <Accordion title="g:is_posix">
+    Ensures shell scripts are interpreted as POSIX-compliant by default, providing better syntax highlighting for shell files.
+  </Accordion>
+
+  <Accordion title="g:netrw_liststyle">
+    Sets the built-in file browser (netrw) to tree-style listing (style 3), making directory navigation more intuitive.
+  </Accordion>
+
+  <Accordion title="syntax enable">
+    Enables syntax highlighting while preserving any existing color settings.
+  </Accordion>
+</AccordionGroup>
+
+## File Handling
+
+```vim
+set autoread
+```
+
+Automatically reloads files when they're changed outside of Vim. Useful when working with files that may be modified by other tools or processes.
+
+## Editing Behavior
+
+```vim
+set expandtab
+set shiftwidth=2
+set smartindent
+set tabstop=2
+```
+
+<CardGroup cols={2}>
+  <Card title="expandtab">
+    Converts tab characters to spaces, ensuring consistent indentation across different editors and environments.
+  </Card>
+
+  <Card title="shiftwidth=2">
+    Sets indentation width to 2 spaces when using `>>`, `<<`, or automatic indentation.
+  </Card>
+
+  <Card title="smartindent">
+    Enables smart auto-indenting for code, recognizing language syntax (e.g., adding indent after `{`).
+  </Card>
+
+  <Card title="tabstop=2">
+    Displays tab characters as 2 spaces wide, matching the shiftwidth for consistency.
+  </Card>
+</CardGroup>
+
+<Note>
+This configuration uses 2-space indentation, common in JavaScript, Ruby, and many web development projects.
+</Note>
+
+## Search Settings
+
+```vim
+set hlsearch
+set ignorecase
+set incsearch
+set re=0
+```
+
+| Setting | Purpose |
+|---------|----------|
+| `hlsearch` | Highlights all search matches in the buffer |
+| `ignorecase` | Makes searches case-insensitive by default |
+| `incsearch` | Shows matches incrementally as you type the search pattern |
+| `re=0` | Uses the old regex engine (more reliable for some patterns) |
+
+## UI Configuration
+
+```vim
+set nowrap
+set number
+set relativenumber
+set signcolumn=no
+```
+
+<AccordionGroup>
+  <Accordion title="nowrap">
+    Disables line wrapping, keeping long lines extending beyond the screen. Scroll horizontally to view them.
+  </Accordion>
+
+  <Accordion title="number">
+    Shows absolute line numbers in the gutter, useful for referencing specific lines.
+  </Accordion>
+
+  <Accordion title="relativenumber">
+    Displays line numbers relative to the cursor position. Combined with `number`, the current line shows the absolute number while others show relative distance.
+    
+    This is particularly useful for Vim motions like `10j` (move down 10 lines) or `5dd` (delete 5 lines).
+  </Accordion>
+
+  <Accordion title="signcolumn=no">
+    Disables the sign column (typically used by plugins for showing git changes or diagnostics), providing a cleaner interface.
+  </Accordion>
+</AccordionGroup>
+
+## File Completion
+
+```vim
+set path+=**
+set wildignore+=*.o,*.obj,.git,*.pyc,*.swp,DS_Store,.build
+set wildmenu
+set wildmode=longest:full,full
+```
+
+### Path Search
+
+`path+=**` enables recursive file searching from the current directory, allowing commands like `:find` to search subdirectories.
+
+### Wildmenu Completion
+
+<Steps>
+  <Step title="wildmenu">
+    Enables enhanced command-line completion with a visual menu.
+  </Step>
+  
+  <Step title="wildmode">
+    Configures completion behavior:
+    - First Tab: Complete to longest common string and show full menu
+    - Second Tab: Complete to next full match
+  </Step>
+  
+  <Step title="wildignore">
+    Excludes unwanted files from completion:
+    - Compiled files: `*.o`, `*.obj`, `*.pyc`
+    - Temporary files: `*.swp`
+    - System files: `.DS_Store`
+    - Build directories: `.git`, `.build`
+  </Step>
+</Steps>
+
+## Filetype-Specific Behavior
+
+```vim
+autocmd FileType markdown setlocal wrap
+```
+
+Automatically enables line wrapping for Markdown files, making prose easier to read and edit.
+
+<Tip>
+Add more autocmds to customize behavior for specific file types:
+```vim
+autocmd FileType python setlocal shiftwidth=4 tabstop=4
+autocmd FileType go setlocal noexpandtab
+```
+</Tip>
+
+## Key Mappings
+
+```vim
+nnoremap <silent> <C-[> :nohlsearch<CR><C-[>
+nnoremap <silent> <Esc> :nohlsearch<CR><Esc>
+```
+
+Maps both `Escape` and `Ctrl-[` to clear search highlighting. After searching with `/` or `?`, pressing Escape removes the visual highlights while keeping you in normal mode.
+
+<Note>
+`<silent>` prevents the command from being echoed on the command line, and `<CR>` represents the Enter key.
+</Note>
+
+## Installation
+
+The Vim configuration is symlinked during setup:
+
+```bash
+ln -sf "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
+```
+
+Changes take effect:
+- Automatically when opening new Vim instances
+- In current session with `:source ~/.vimrc`
+
+## Related Configuration
+
+- [Zed Configuration](/config/zed) - Modern editor alternative with Vim mode
+- [Shell Configuration](/config/shell) - Terminal environment setup

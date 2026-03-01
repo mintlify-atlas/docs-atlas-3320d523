@@ -1,0 +1,116 @@
+---
+title: Shell Configuration
+description: Zsh configuration with path setup, shell options, Homebrew integration, and Starship prompt
+---
+
+The shell configuration is defined in `.zshrc` and sets up your Zsh environment with essential path modifications, shell options, and integrations.
+
+## Overview
+
+The `.zshrc` file configures:
+- Custom PATH additions for local binaries
+- Shell behavior options
+- Homebrew environment integration
+- Starship prompt initialization
+
+## Configuration File
+
+```bash .zshrc
+export PATH="$HOME/.local/bin/:$PATH"
+setopt auto_cd correct histignorealldups interactive_comments sharehistory
+eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(starship init zsh)"
+```
+
+## Key Settings
+
+### PATH Configuration
+
+```bash
+export PATH="$HOME/.local/bin/:$PATH"
+```
+
+Adds `~/.local/bin/` to the beginning of your PATH, allowing you to install and run user-local binaries without sudo privileges. This directory takes precedence over system binaries.
+
+### Shell Options
+
+```bash
+setopt auto_cd correct histignorealldups interactive_comments sharehistory
+```
+
+Enables several Zsh options for improved shell behavior:
+
+<AccordionGroup>
+  <Accordion title="auto_cd">
+    Allows changing directories by typing just the directory name (without `cd` command).
+    
+    ```bash
+    # Instead of: cd ~/workspace
+    ~/workspace
+    ```
+  </Accordion>
+
+  <Accordion title="correct">
+    Enables command correction suggestions when you mistype a command.
+    
+    ```bash
+    $ gti status
+    zsh: correct 'gti' to 'git' [nyae]?
+    ```
+  </Accordion>
+
+  <Accordion title="histignorealldups">
+    Removes duplicate entries from command history, keeping only the most recent occurrence of each command.
+  </Accordion>
+
+  <Accordion title="interactive_comments">
+    Allows using `#` to add comments in interactive shell sessions.
+    
+    ```bash
+    $ ls -la  # List all files including hidden ones
+    ```
+  </Accordion>
+
+  <Accordion title="sharehistory">
+    Shares command history between all active Zsh sessions in real-time.
+  </Accordion>
+</AccordionGroup>
+
+### Homebrew Integration
+
+```bash
+eval "$(/opt/homebrew/bin/brew shellenv)"
+```
+
+Initializes the Homebrew environment by setting up necessary environment variables and PATH entries. This is essential for macOS Apple Silicon machines where Homebrew installs to `/opt/homebrew`.
+
+<Note>
+On Intel Macs, Homebrew installs to `/usr/local/bin/brew` instead. The shellenv command automatically handles the correct paths.
+</Note>
+
+### Starship Prompt
+
+```bash
+eval "$(starship init zsh)"
+```
+
+Initializes the [Starship prompt](https://starship.rs), a fast and customizable cross-shell prompt. See the [Starship Configuration](/config/starship) page for details on prompt customization.
+
+## Installation
+
+The shell configuration is automatically installed by the setup script:
+
+```bash
+ln -sf "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+```
+
+To apply changes after editing, either restart your terminal or source the file:
+
+```bash
+source ~/.zshrc
+```
+
+## Related Configuration
+
+- [Starship Configuration](/config/starship) - Customize your command prompt appearance
+- [Git Configuration](/config/git) - Git aliases and settings

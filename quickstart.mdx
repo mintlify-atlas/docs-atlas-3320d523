@@ -1,80 +1,335 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get up and running with mac9sb/config in under 5 minutes
 ---
 
-## Get started in three steps
+## Overview
 
-Get your documentation site running locally and make your first customization.
+This guide will walk you through cloning the repository and running the automated setup script to configure your macOS development environment. The entire process takes about 5-15 minutes, depending on your internet connection and whether Xcode Command Line Tools are already installed.
 
-### Step 1: Set up your local environment
+<Info>
+  The setup script is idempotent, meaning it's safe to run multiple times. It will detect existing installations and skip steps that have already been completed.
+</Info>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+## Quick Setup
+
+<Steps>
+  <Step title="Clone the repository">
+    Open Terminal and clone the config repository to `~/.config`:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```bash
+    git clone https://github.com/mac9sb/config.git ~/.config
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Info>
+      The script expects the repository to be located at `~/.config`. If this directory already exists and isn't a git repository, you'll need to back it up first.
+    </Info>
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="Navigate to the config directory">
+    ```bash
+    cd ~/.config
+    ```
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Step title="Run the setup script">
+    Execute the setup script:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    ./setup.sh
+    ```
+    
+    The script will display timestamped log messages as it progresses through each step:
+    
+    ```bash
+    2026-03-01T10:30:15-0800 [INFO] Starting macOS setup
+    2026-03-01T10:30:15-0800 [INFO] Config repo: already present at /Users/mac/.config
+    2026-03-01T10:30:16-0800 [INFO] Xcode Command Line Tools: already installed
+    2026-03-01T10:30:16-0800 [INFO] Touch ID: already enabled (sudo_local)
+    2026-03-01T10:30:16-0800 [INFO] Homebrew: already installed
+    2026-03-01T10:30:16-0800 [INFO] Running: brew bundle
+    ```
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Complete Xcode Command Line Tools installation (if needed)">
+    If Xcode Command Line Tools aren't installed, a GUI dialog will appear:
+    
+    <Warning>
+      The script will pause and exit after triggering the Xcode CLT installation. Complete the installation through the GUI dialog, then re-run `./setup.sh` to continue.
+    </Warning>
+    
+    After the installation completes, run the script again:
+    
+    ```bash
+    ./setup.sh
+    ```
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Wait for Homebrew bundle installation">
+    The longest step is installing packages via Homebrew. The script installs:
+    
+    - 6 command-line tools (formulae)
+    - 6 applications (casks)
+    - 11 Mac App Store apps
+    
+    <Note>
+      Mac App Store apps require you to be signed in to the App Store and may require purchase confirmation even for free apps.
+    </Note>
+  </Step>
 
-### Step 3: Go live
+  <Step title="Restart your terminal">
+    Once the script completes with "Done ✅", restart your terminal or source the new configuration:
+    
+    ```bash
+    source ~/.zshrc
+    ```
+    
+    You should see the Starship prompt appear with a modern, informative display.
+  </Step>
+</Steps>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## What Just Happened?
 
-## Next steps
-
-Now that you have your docs running, explore these key features:
+The setup script performed these operations:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="System Setup" icon="laptop">
+    - Installed Xcode Command Line Tools
+    - Enabled Touch ID for sudo
+    - Installed Homebrew package manager
+  </Card>
+  
+  <Card title="Configuration" icon="file">
+    - Cloned dotfiles to ~/.config
+    - Symlinked dotfiles to home directory
+    - Applied Zsh, Git, and Vim configurations
+  </Card>
+  
+  <Card title="Development Tools" icon="terminal">
+    - Installed deno, gh, starship, mosh
+    - Configured Starship shell prompt
+    - Set up GitHub CLI
+  </Card>
+  
+  <Card title="Applications" icon="grid">
+    - Installed Zed, Claude Code, Codex
+    - Installed Mac App Store apps
+    - Set up fonts and utilities
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Verification
+
+Verify your installation with these commands:
+
+<CodeGroup>
+  ```bash Check Starship
+  starship --version
+  ```
+
+  ```bash Check Deno
+  deno --version
+  ```
+
+  ```bash Check GitHub CLI
+  gh --version
+  ```
+
+  ```bash Verify dotfile symlinks
+  ls -la ~ | grep '.zshrc\|.gitconfig\|.vimrc'
+  ```
+</CodeGroup>
+
+You should see version information for each tool and symlinks pointing to `~/.config/` for your dotfiles.
+
+## Expected Output
+
+A successful setup run looks like this:
+
+```bash
+2026-03-01T10:30:15-0800 [INFO] Starting macOS setup
+2026-03-01T10:30:15-0800 [INFO] Config repo: already present at /Users/mac/.config
+2026-03-01T10:30:16-0800 [INFO] Xcode Command Line Tools: already installed
+2026-03-01T10:30:16-0800 [INFO] Enabling Touch ID for sudo (requires sudo)...
+2026-03-01T10:30:18-0800 [INFO] Touch ID: enabled successfully
+2026-03-01T10:30:18-0800 [INFO] Homebrew: already installed
+2026-03-01T10:30:18-0800 [INFO] Running: brew bundle
+Installing deno...
+Installing fswatch...
+Installing gh...
+[...additional brew output...]
+2026-03-01T10:35:42-0800 [INFO] Done ✅
+```
+
+## Shell Configuration Applied
+
+Your new `.zshrc` configuration includes:
+
+```bash .zshrc
+export PATH="$HOME/.local/bin/:$PATH"
+setopt auto_cd correct histignorealldups interactive_comments sharehistory
+eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$(starship init zsh)"
+```
+
+This provides:
+- Local bin directory in your PATH
+- Auto CD (type directory name to cd into it)
+- Spell correction for commands
+- Shared history across terminal sessions
+- Starship prompt integration
+
+## Testing Your Setup
+
+Try these commands to test your new environment:
+
+<Steps>
+  <Step title="Test Git configuration">
+    ```bash
+    git config --get user.name
+    git config --get user.email
+    ```
+    
+    You'll see the pre-configured user information. Update these with your own details:
+    
+    ```bash
+    git config --global user.name "Your Name"
+    git config --global user.email "your.email@example.com"
+    ```
+  </Step>
+
+  <Step title="Test GitHub CLI">
+    Authenticate with GitHub:
+    
+    ```bash
+    gh auth login
+    ```
+    
+    Then try listing your repositories:
+    
+    ```bash
+    gh repo list
+    ```
+  </Step>
+
+  <Step title="Test Deno">
+    Run a simple Deno program:
+    
+    ```bash
+    deno eval "console.log('Hello from Deno!')"
+    ```
+  </Step>
+
+  <Step title="Open Zed editor">
+    Launch the Zed editor:
+    
+    ```bash
+    zed .
+    ```
+    
+    The Zed configuration from `~/.config/zed/` will be automatically applied.
+  </Step>
+</Steps>
+
+## Common First-Run Issues
+
+<AccordionGroup>
+  <Accordion title="Starship prompt not appearing">
+    If the Starship prompt doesn't appear after restarting your terminal:
+    
+    1. Verify Starship is installed:
+       ```bash
+       which starship
+       ```
+    
+    2. Manually initialize Starship:
+       ```bash
+       eval "$(starship init zsh)"
+       ```
+    
+    3. Check that `.zshrc` is properly symlinked:
+       ```bash
+       ls -la ~/.zshrc
+       ```
+  </Accordion>
+
+  <Accordion title="Touch ID for sudo not working">
+    Touch ID for sudo requires macOS Sonoma or later and may not work in all terminal emulators. To test:
+    
+    ```bash
+    sudo echo "Testing Touch ID"
+    ```
+    
+    If Touch ID prompt doesn't appear, you may need to manually edit `/etc/pam.d/sudo_local` or use password authentication.
+  </Accordion>
+
+  <Accordion title="Mac App Store apps not installing">
+    If Mac App Store apps fail to install:
+    
+    1. Ensure you're signed in to the App Store
+    2. Some apps require previous purchase or subscription
+    3. Install apps manually if needed:
+       ```bash
+       mas search "App Name"
+       mas install <app-id>
+       ```
+  </Accordion>
+
+  <Accordion title="Homebrew bundle fails">
+    If `brew bundle` fails:
+    
+    1. Update Homebrew:
+       ```bash
+       brew update
+       ```
+    
+    2. Try installing packages individually:
+       ```bash
+       brew install deno gh starship mosh fswatch mas
+       ```
+    
+    3. Check for specific error messages and search Homebrew's issue tracker
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Now that your environment is set up:
+
+<CardGroup cols={2}>
+  <Card title="Shell Configuration" icon="terminal" href="/config/shell">
+    Learn how to customize your shell and prompt settings
+  </Card>
+  
+  <Card title="Editor Setup" icon="code" href="/config/vim">
+    Configure Vim and Zed for your workflow
+  </Card>
+  
+  <Card title="Homebrew Packages" icon="box" href="/reference/brewfile">
+    Explore all installed packages and applications
+  </Card>
+  
+  <Card title="Troubleshooting" icon="life-ring" href="/reference/troubleshooting">
+    Get help with common issues and edge cases
+  </Card>
+</CardGroup>
+
+## Re-running the Setup
+
+<Info>
+  The setup script is designed to be re-run safely. It checks for existing installations and only performs necessary steps.
+</Info>
+
+To update your configuration or re-apply settings:
+
+```bash
+cd ~/.config
+git pull
+./setup.sh
+```
+
+This will:
+- Pull the latest changes from the repository
+- Re-create symlinks for any new dotfiles
+- Update Homebrew packages via `brew bundle`
+- Skip already-completed steps like Xcode CLT installation

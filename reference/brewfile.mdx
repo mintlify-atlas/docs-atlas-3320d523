@@ -1,0 +1,237 @@
+---
+title: Brewfile Reference
+description: Complete reference of all packages, applications, and tools installed via Homebrew
+---
+
+The Brewfile defines all software packages installed on your macOS system through Homebrew. This includes command-line tools (formulae), GUI applications (casks), and Mac App Store applications.
+
+## Formulae
+
+Command-line tools and utilities installed via Homebrew:
+
+### deno
+
+A modern JavaScript and TypeScript runtime built on V8, Rust, and Tokio.
+
+```ruby
+brew "deno"
+```
+
+### fswatch
+
+A cross-platform file change monitor with multiple backends. Useful for watching file system events and triggering actions.
+
+```ruby
+brew "fswatch"
+```
+
+### gh
+
+GitHub's official command-line tool for working with GitHub repositories, issues, pull requests, and more.
+
+```ruby
+brew "gh"
+```
+
+### mas
+
+Mac App Store command-line interface. Enables scripted installation of Mac App Store applications.
+
+```ruby
+brew "mas"
+```
+
+### mosh
+
+Mobile Shell - a remote terminal application that allows roaming, supports intermittent connectivity, and provides intelligent local echo.
+
+```ruby
+brew "mosh"
+```
+
+### starship
+
+A minimal, blazing-fast, and customizable prompt for any shell. Written in Rust.
+
+```ruby
+brew "starship"
+```
+
+## Casks
+
+GUI applications installed via Homebrew Cask:
+
+### claude-code
+
+Claude Code editor integration for AI-assisted development.
+
+```ruby
+cask "claude-code"
+```
+
+### codex
+
+A powerful code editor and development tool.
+
+```ruby
+cask "codex"
+```
+
+### crossover
+
+Run Windows applications on macOS without requiring a Windows license.
+
+```ruby
+cask "crossover"
+```
+
+### font-sf-mono-nerd-font-ligaturized
+
+SF Mono font patched with Nerd Fonts icons and programming ligatures.
+
+```ruby
+cask "font-sf-mono-nerd-font-ligaturized"
+```
+
+### steam
+
+Valve's digital distribution platform for games.
+
+```ruby
+cask "steam"
+```
+
+### zed
+
+A high-performance, multiplayer code editor from the creators of Atom and Tree-sitter.
+
+```ruby
+cask "zed"
+```
+
+## Mac App Store Apps
+
+Applications installed directly from the Mac App Store using `mas`:
+
+### Wipr 2
+
+Safari content blocker for blocking ads and trackers.
+
+```ruby
+mas "Wipr 2", id: 1662217862
+```
+
+### Xcode
+
+Apple's integrated development environment (IDE) for macOS, iOS, watchOS, and tvOS development.
+
+```ruby
+mas "Xcode", id: 497799835
+```
+
+### Logic Pro
+
+Professional music production and audio editing software.
+
+```ruby
+mas "Logic Pro", id: 634148309
+```
+
+### Final Cut Pro
+
+Professional video editing application.
+
+```ruby
+mas "Final Cut Pro", id: 424389933
+```
+
+### Pixelmator Pro
+
+Professional image editing application.
+
+```ruby
+mas "Pixelmator Pro", id: 1289583905
+```
+
+### Motion
+
+Motion graphics tool for creating cinematic 2D and 3D titles, fluid transitions, and realistic effects.
+
+```ruby
+mas "Motion", id: 434290957
+```
+
+### Mainstage
+
+Live performance tool designed for musicians.
+
+```ruby
+mas "Mainstage", id: 634159523
+```
+
+### Keynote
+
+Apple's presentation software.
+
+```ruby
+mas "Keynote", id: 361285480
+```
+
+### Pages
+
+Apple's word processor and page layout application.
+
+```ruby
+mas "Pages", id: 361309726
+```
+
+### Numbers
+
+Apple's spreadsheet application.
+
+```ruby
+mas "Numbers", id: 361304891
+```
+
+### Compressor
+
+Professional video encoding and transcoding tool.
+
+```ruby
+mas "Compressor", id: 424390742
+```
+
+## Full Brewfile
+
+Here's the complete Brewfile as defined in the repository:
+
+```ruby
+# ——— Formulae  ———
+brew "deno"
+brew "fswatch"
+brew "gh"
+brew "mas"
+brew "mosh"
+brew "starship"
+
+# ——— Casks  ———
+cask "claude-code"
+cask "codex"
+cask "crossover"
+cask "font-sf-mono-nerd-font-ligaturized"
+cask "steam"
+cask "zed"
+
+# ——— Apps  ———
+mas "Wipr 2", id: 1662217862
+mas "Xcode", id: 497799835
+mas "Logic Pro", id: 634148309
+mas "Final Cut Pro", id: 424389933
+mas "Pixelmator Pro", id: 1289583905
+mas "Motion", id: 434290957
+mas "Mainstage", id: 634159523
+mas "Keynote", id: 361285480
+mas "Pages", id: 361309726
+mas "Numbers", id: 361304891
+mas "Compressor", id: 424390742
+```

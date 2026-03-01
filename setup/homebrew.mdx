@@ -1,0 +1,175 @@
+---
+title: Homebrew Setup
+description: Homebrew installation and package management with brew bundle
+---
+
+The setup script installs Homebrew and uses `brew bundle` to install all formulae, casks, and Mac App Store applications defined in the Brewfile.
+
+## Installation
+
+Homebrew is installed automatically if not already present:
+
+```sh
+install_brew_if_missing() {
+  if command -v brew >/dev/null 2>&1; then
+    log "Homebrew: already installed"
+    return 0
+  fi
+
+  log "Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://brew.sh/install)"
+}
+```
+
+The function checks if the `brew` command exists before attempting installation, making it safe to run multiple times.
+
+## Bundle Installation
+
+After Homebrew is installed, the script runs `brew bundle` from the config directory:
+
+```sh
+brew_bundle() {
+  cd "$CONFIG_DIR"
+  if [ ! -f "./Brewfile" ]; then
+    warn "Brewfile not found in current directory: $(pwd)"
+    log "Skipping brew bundle."
+    return 0
+  fi
+
+  log "Running: brew bundle"
+
+  eval "$(/opt/homebrew/bin/brew shellenv)" && brew bundle
+}
+```
+
+<Note>
+The script sources Homebrew's shell environment before running bundle to ensure the correct paths are set, especially on Apple Silicon Macs where Homebrew installs to `/opt/homebrew`.
+</Note>
+
+## Installed Packages
+
+The Brewfile defines three categories of software:
+
+### Formulae (CLI Tools)
+
+Command-line tools installed via Homebrew:
+
+```ruby
+brew "deno"      # JavaScript/TypeScript runtime
+brew "fswatch"   # File system change monitor
+brew "gh"        # GitHub CLI
+brew "mas"       # Mac App Store CLI
+brew "mosh"      # Mobile shell (SSH alternative)
+brew "starship"  # Cross-shell prompt
+```
+
+### Casks (GUI Applications)
+
+Desktop applications installed via Homebrew Cask:
+
+```ruby
+cask "claude-code"                          # AI coding assistant
+cask "codex"                                # Code snippet manager
+cask "crossover"                            # Windows compatibility layer
+cask "font-sf-mono-nerd-font-ligaturized"  # SF Mono with Nerd Font icons
+cask "steam"                                # Gaming platform
+cask "zed"                                  # Code editor
+```
+
+### Mac App Store Apps
+
+Applications installed via `mas` (Mac App Store CLI):
+
+```ruby
+mas "Wipr 2", id: 1662217862           # Safari content blocker
+mas "Xcode", id: 497799835             # Apple's IDE
+mas "Logic Pro", id: 634148309         # Music production
+mas "Final Cut Pro", id: 424389933     # Video editing
+mas "Pixelmator Pro", id: 1289583905   # Image editing
+mas "Motion", id: 434290957            # Motion graphics
+mas "Mainstage", id: 634159523         # Live performance
+mas "Keynote", id: 361285480           # Presentations
+mas "Pages", id: 361309726             # Word processing
+mas "Numbers", id: 361304891           # Spreadsheets
+mas "Compressor", id: 424390742        # Video transcoding
+```
+
+<Warning>
+Mac App Store installations via `mas` require you to be signed in to the App Store and to have previously purchased or downloaded the apps.
+</Warning>
+
+## Managing Your Brewfile
+
+### Generating from Existing System
+
+You can generate a Brewfile from your current installations:
+
+```bash
+brew bundle dump --file=~/.config/Brewfile
+```
+
+### Adding New Packages
+
+To add packages to your setup:
+
+<Steps>
+  <Step title="Edit the Brewfile">
+    Add entries to `~/.config/Brewfile`:
+    
+    ```ruby
+    brew "package-name"        # For CLI tools
+    cask "app-name"           # For GUI apps
+    mas "App Name", id: 12345 # For Mac App Store apps
+    ```
+  </Step>
+
+  <Step title="Install new packages">
+    Run brew bundle to install only the new additions:
+    
+    ```bash
+    cd ~/.config
+    brew bundle
+    ```
+  </Step>
+</Steps>
+
+### Cleanup
+
+Remove packages not listed in the Brewfile:
+
+```bash
+cd ~/.config
+brew bundle cleanup
+```
+
+<Info>
+Use `brew bundle cleanup --force` to remove packages without confirmation. Be careful with this command as it will uninstall anything not in your Brewfile.
+</Info>
+
+## Troubleshooting
+
+### Brewfile Not Found
+
+If you see "Brewfile not found", ensure:
+
+1. The config repository was cloned successfully to `~/.config`
+2. The Brewfile exists at `~/.config/Brewfile`
+3. You're running the script from the correct directory
+
+The script handles this gracefully:
+
+```sh
+if [ ! -f "./Brewfile" ]; then
+  warn "Brewfile not found in current directory: $(pwd)"
+  log "Skipping brew bundle."
+  return 0
+fi
+```
+
+### Mac App Store Authentication
+
+If `mas` installations fail:
+
+1. Sign in to the Mac App Store manually
+2. Ensure you've previously "purchased" (even if free) the apps
+3. Run the setup script again

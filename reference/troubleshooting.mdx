@@ -1,0 +1,372 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for macOS setup
+---
+
+This page covers common issues you might encounter during setup and how to resolve them.
+
+## Installation Issues
+
+<Accordion title="Script exits immediately with 'This script is macOS-only'">
+  This error occurs when running the setup script on a non-macOS system.
+
+  **Cause:** The script detected the operating system is not Darwin (macOS).
+
+  **Solution:** This setup is designed exclusively for macOS. If you're on macOS and seeing this error, your system may have an unusual configuration. Verify with:
+  
+  ```bash
+  uname -s
+  ```
+  
+  This should return `Darwin`. If it doesn't, contact support.
+</Accordion>
+
+<Accordion title="Error: 'Config path already exists and is not a git repo'">
+  This happens when `~/.config` exists but wasn't created by this setup script.
+
+  **Cause:** The `~/.config` directory exists but is not a git repository.
+
+  **Solution:** 
+  
+  1. Back up your existing config directory:
+     ```bash
+     mv ~/.config ~/.config.backup
+     ```
+  
+  2. Re-run the setup script:
+     ```bash
+     ./setup.sh
+     ```
+  
+  3. Manually merge any important files from `~/.config.backup` if needed.
+</Accordion>
+
+<Accordion title="Brewfile not found in current directory">
+  The script can't locate the Brewfile needed for package installation.
+
+  **Cause:** The config repository was cloned but doesn't contain a Brewfile, or the directory structure is unexpected.
+
+  **Solution:**
+  
+  1. Verify the Brewfile exists:
+     ```bash
+     ls -la ~/.config/Brewfile
+     ```
+  
+  2. If missing, ensure the repository cloned correctly:
+     ```bash
+     cd ~/.config
+     git status
+     git pull origin main
+     ```
+  
+  3. Re-run the setup script.
+</Accordion>
+
+## Xcode Command Line Tools
+
+<Accordion title="Xcode CLT installation prompt doesn't appear">
+  The GUI prompt for installing Command Line Tools fails to show.
+
+  **Cause:** The system may already have CLT partially installed, or the installation mechanism is blocked.
+
+  **Solution:**
+  
+  Try installing manually:
+  ```bash
+  xcode-select --install
+  ```
+  
+  If that fails, install from Xcode preferences:
+  1. Download Xcode from the Mac App Store
+  2. Open Xcode > Settings > Locations
+  3. Select a Command Line Tools version from the dropdown
+</Accordion>
+
+<Accordion title="'xcode-select: error: tool 'xcodebuild' requires Xcode'">
+  Some tools require the full Xcode installation, not just Command Line Tools.
+
+  **Cause:** Certain development workflows require the complete Xcode IDE.
+
+  **Solution:**
+  
+  Install Xcode from the Mac App Store (included in Brewfile as `mas "Xcode"`), then run:
+  ```bash
+  sudo xcodebuild -license accept
+  ```
+</Accordion>
+
+<Accordion title="Script says to re-run after CLT installation, but nothing happens">
+  After the CLT GUI installer completes, re-running the script doesn't progress.
+
+  **Cause:** The installation may not have completed successfully, or the path isn't properly set.
+
+  **Solution:**
+  
+  Verify installation:
+  ```bash
+  xcode-select -p
+  ```
+  
+  Should return `/Library/Developer/CommandLineTools` or similar. If it returns an error, the installation failed. Try:
+  ```bash
+  sudo rm -rf /Library/Developer/CommandLineTools
+  xcode-select --install
+  ```
+</Accordion>
+
+## Homebrew Issues
+
+<Accordion title="brew command not found after installation">
+  Homebrew installed but the `brew` command isn't available.
+
+  **Cause:** Homebrew's bin directory isn't in your shell's PATH.
+
+  **Solution:**
+  
+  Add Homebrew to your PATH by running:
+  ```bash
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+  ```
+  
+  For Apple Silicon Macs, add this to your `~/.zprofile`:
+  ```bash
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+  ```
+  
+  For Intel Macs, use `/usr/local/bin/brew` instead.
+</Accordion>
+
+<Accordion title="brew bundle fails with 'Error: Cask X is unavailable'">
+  Some casks in the Brewfile can't be installed.
+
+  **Cause:** Cask name changed, removed from Homebrew, or requires specific macOS version.
+
+  **Solution:**
+  
+  1. Update Homebrew:
+     ```bash
+     brew update
+     ```
+  
+  2. Search for the correct cask name:
+     ```bash
+     brew search <package-name>
+     ```
+  
+  3. Edit the Brewfile to use the correct name or remove unavailable casks:
+     ```bash
+     nano ~/.config/Brewfile
+     ```
+  
+  4. Re-run brew bundle:
+     ```bash
+     cd ~/.config
+     brew bundle
+     ```
+</Accordion>
+
+<Accordion title="mas fails to install App Store apps">
+  Mac App Store installations fail with authentication errors.
+
+  **Cause:** Not signed into the Mac App Store, or apps require purchase.
+
+  **Solution:**
+  
+  1. Sign into the Mac App Store:
+     - Open App Store.app
+     - Sign in with your Apple ID
+  
+  2. Verify you own the apps listed in the Brewfile (Xcode is free, but Logic Pro, Final Cut Pro, etc. require purchase)
+  
+  3. Try installing manually first:
+     ```bash
+     mas install 497799835  # Xcode
+     ```
+  
+  4. If specific apps fail, comment them out in the Brewfile temporarily.
+</Accordion>
+
+<Accordion title="brew bundle takes extremely long or hangs">
+  Package installation appears stuck or takes hours.
+
+  **Cause:** Large applications (Xcode is 10+ GB), slow network, or failed downloads.
+
+  **Solution:**
+  
+  1. Check network connectivity
+  
+  2. Run brew bundle with verbose output:
+     ```bash
+     cd ~/.config
+     brew bundle --verbose
+     ```
+  
+  3. For large App Store apps, install them manually via App Store.app first
+  
+  4. Cancel and restart if truly hung (Ctrl+C, then re-run)
+</Accordion>
+
+## Permission Issues
+
+<Accordion title="Permission denied when creating symlinks">
+  The script fails when trying to create symbolic links in the home directory.
+
+  **Cause:** File permissions prevent overwriting existing files, or target files are immutable.
+
+  **Solution:**
+  
+  Check if files are locked:
+  ```bash
+  ls -lO ~/ | grep -E 'uchg|schg'
+  ```
+  
+  Unlock files if needed:
+  ```bash
+  chflags nouchg ~/.zshrc  # Example for specific file
+  ```
+  
+  Then re-run the setup script.
+</Accordion>
+
+<Accordion title="Touch ID configuration fails even with sudo">
+  Enabling Touch ID for sudo doesn't work despite entering password.
+
+  **Cause:** Template file missing, System Integrity Protection (SIP) restrictions, or sed command issues.
+
+  **Solution:**
+  
+  1. Verify the template exists:
+     ```bash
+     ls -la /etc/pam.d/sudo_local.template
+     ```
+  
+  2. If missing, this feature is not available on your macOS version (requires macOS Sonoma or later)
+  
+  3. Manually create `/etc/pam.d/sudo_local`:
+     ```bash
+     sudo nano /etc/pam.d/sudo_local
+     ```
+     
+     Add this line:
+     ```
+     auth       sufficient     pam_tid.so
+     ```
+  
+  4. Test with:
+     ```bash
+     sudo -k
+     sudo echo "test"  # Should prompt for Touch ID
+     ```
+</Accordion>
+
+<Accordion title="Operation not permitted errors on /usr/local">
+  Cannot write to `/usr/local` during Homebrew installation.
+
+  **Cause:** System Integrity Protection (SIP) or incorrect ownership.
+
+  **Solution:**
+  
+  Fix ownership:
+  ```bash
+  sudo chown -R $(whoami):admin /usr/local
+  ```
+  
+  On Apple Silicon Macs, Homebrew uses `/opt/homebrew` instead, which shouldn't have this issue.
+</Accordion>
+
+## Git and Repository Issues
+
+<Accordion title="git clone fails with authentication error">
+  Cannot clone the config repository from GitHub.
+
+  **Cause:** Network issues, GitHub authentication problems, or repository is private.
+
+  **Solution:**
+  
+  1. Test GitHub connectivity:
+     ```bash
+     ssh -T git@github.com
+     ```
+  
+  2. Try HTTPS instead of SSH:
+     ```bash
+     git clone https://github.com/mac9sb/config.git ~/.config
+     ```
+  
+  3. If repository is private, ensure you have access and are authenticated with GitHub
+</Accordion>
+
+<Accordion title="Symlinks point to wrong location after repository move">
+  Dotfiles are broken symlinks after moving or renaming `~/.config`.
+
+  **Cause:** Absolute symlinks that break when the source moves.
+
+  **Solution:**
+  
+  Re-run the symlink creation part:
+  ```bash
+  for file in ~/.config/.*; do
+    [ -f "$file" ] || continue
+    filename="$(basename "$file")"
+    case "$filename" in
+      .|..|.git) continue ;;
+      *) ln -sf "$file" ~/ ;;
+    esac
+  done
+  ```
+</Accordion>
+
+## General Troubleshooting
+
+<Accordion title="How do I run the script again after fixing issues?">
+  The script is designed to be idempotent - safe to run multiple times.
+
+  **Solution:**
+  
+  Simply run:
+  ```bash
+  cd ~/.config
+  ./setup.sh
+  ```
+  
+  The script checks if each step is already done and skips completed steps.
+</Accordion>
+
+<Accordion title="How do I see detailed error messages?">
+  Need more verbose output for debugging.
+
+  **Solution:**
+  
+  Run with bash's trace mode:
+  ```bash
+  bash -x ./setup.sh
+  ```
+  
+  This prints each command before executing it.
+</Accordion>
+
+<Accordion title="Can I skip certain parts of the setup?">
+  Want to run only specific setup steps.
+
+  **Solution:**
+  
+  Comment out unwanted function calls in `setup.sh`:
+  
+  ```bash
+  # log "Starting macOS setup"
+  # ensure_config_repo
+  # symlink_home_dotfiles
+  # install_xcode_clt
+  # enable_touchid_for_sudo  # Skip this
+  install_brew_if_missing
+  brew_bundle
+  # log "Done ✅"
+  ```
+  
+  Or call individual functions:
+  ```bash
+  source setup.sh
+  brew_bundle  # Run only this function
+  ```
+</Accordion>

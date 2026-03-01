@@ -1,0 +1,308 @@
+---
+title: Zed Editor Configuration
+description: Zed editor settings including AI models, fonts, themes, Vim mode, and Emacs-style key bindings
+---
+
+The Zed editor configuration consists of two files: `settings.json` for editor preferences and `keymap.json` for custom key bindings.
+
+## Overview
+
+The configuration includes:
+- AI agent settings with Google Gemini models
+- Font and appearance customization
+- Vim mode integration
+- Language-specific settings
+- SSH remote development
+- Custom Emacs-style key bindings
+
+## Settings File
+
+<CodeGroup>
+```json settings.json (Complete)
+{
+  "agent": {
+    "default_width": 420,
+    "commit_message_model": {
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+    },
+    "inline_assistant_model": {
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+    },
+  },
+  "buffer_font_family": "Liga SFMono Nerd Font",
+  "buffer_font_size": 11,
+  "current_line_highlight": "all",
+  "languages": {
+    "Ruby": {
+      "language_servers": ["!solargraph"],
+    },
+  },
+  "minimap": {
+    "show": "always",
+  },
+  "outline_panel": {
+    "dock": "right",
+  },
+  "relative_line_numbers": "enabled",
+  "restore_on_startup": "launchpad",
+  "ssh_connections": [
+    {
+      "host": "dav.internal",
+      "projects": [
+        {
+          "paths": ["/nfs/data/mac/data-migration-py"],
+        },
+      ],
+    },
+  ],
+  "theme": {
+    "mode": "system",
+    "light": "Dayfox - blurred",
+    "dark": "Nightfox - blurred",
+  },
+  "ui_font_size": 12,
+  "vim_mode": true,
+}
+```
+</CodeGroup>
+
+## AI Agent Configuration
+
+```json
+"agent": {
+  "default_width": 420,
+  "commit_message_model": {
+    "provider": "google",
+    "model": "gemini-2.5-flash",
+  },
+  "inline_assistant_model": {
+    "provider": "google",
+    "model": "gemini-2.5-flash",
+  },
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="commit_message_model" icon="message-code">
+    Uses Google's Gemini 2.5 Flash model to generate intelligent commit messages based on your staged changes.
+  </Card>
+
+  <Card title="inline_assistant_model" icon="sparkles">
+    Powers the inline AI assistant for code completion, refactoring suggestions, and coding help.
+  </Card>
+</CardGroup>
+
+<Note>
+Gemini 2.5 Flash is chosen for its balance of speed and quality, providing quick responses for coding assistance.
+</Note>
+
+## Font and Appearance
+
+```json
+"buffer_font_family": "Liga SFMono Nerd Font",
+"buffer_font_size": 11,
+"ui_font_size": 12,
+"current_line_highlight": "all",
+```
+
+### Typography
+
+- **buffer_font_family**: Uses Liga SFMono Nerd Font, which includes:
+  - Programming ligatures for better code readability (`=>`, `!=`, `>=`)
+  - Nerd Font icons for file types and git status
+  - Based on SF Mono, Apple's monospaced font
+
+- **Font sizes**: Slightly smaller buffer font (11pt) vs UI elements (12pt) for optimal screen real estate
+
+### Current Line Highlight
+
+`current_line_highlight: "all"` highlights the entire current line, making it easy to track cursor position.
+
+## Editor Behavior
+
+### Line Numbers
+
+```json
+"relative_line_numbers": "enabled"
+```
+
+Enables relative line numbers, essential for Vim-style navigation. Shows the distance from the current line, making motions like `10j` or `5k` more intuitive.
+
+### Vim Mode
+
+```json
+"vim_mode": true
+```
+
+Enables Vim keybindings and modal editing. Works seamlessly with the custom Emacs-style bindings defined in `keymap.json`.
+
+### Startup Behavior
+
+```json
+"restore_on_startup": "launchpad"
+```
+
+Opens the Launchpad view on startup, showing recent projects and a welcoming interface rather than restoring the last session.
+
+## UI Panels
+
+```json
+"minimap": {
+  "show": "always",
+},
+"outline_panel": {
+  "dock": "right",
+}
+```
+
+<AccordionGroup>
+  <Accordion title="Minimap">
+    Always displays the code minimap, providing a bird's-eye view of your file structure and quick navigation for long files.
+  </Accordion>
+
+  <Accordion title="Outline Panel">
+    Docks the symbol outline panel on the right side, showing functions, classes, and other code structure elements.
+  </Accordion>
+</AccordionGroup>
+
+## Language-Specific Settings
+
+```json
+"languages": {
+  "Ruby": {
+    "language_servers": ["!solargraph"],
+  },
+}
+```
+
+Disables the Solargraph language server for Ruby files (the `!` prefix disables it). This is useful if you prefer a different Ruby language server or want to reduce resource usage.
+
+## Theme Configuration
+
+```json
+"theme": {
+  "mode": "system",
+  "light": "Dayfox - blurred",
+  "dark": "Nightfox - blurred",
+}
+```
+
+Uses the Nightfox theme family with blurred backgrounds:
+- **System mode**: Automatically switches between light and dark themes based on macOS appearance
+- **Dayfox**: Light variant with soft, warm colors
+- **Nightfox**: Dark variant with good contrast and reduced eye strain
+
+## SSH Connections
+
+```json
+"ssh_connections": [
+  {
+    "host": "dav.internal",
+    "projects": [
+      {
+        "paths": ["/nfs/data/mac/data-migration-py"],
+      },
+    ],
+  },
+]
+```
+
+Configures remote development via SSH to `dav.internal`, with quick access to the data-migration-py project. This enables editing remote files as if they were local.
+
+<Tip>
+Add multiple SSH connections for different development servers:
+```json
+"ssh_connections": [
+  { "host": "dev.example.com", "projects": [...] },
+  { "host": "staging.example.com", "projects": [...] }
+]
+```
+</Tip>
+
+## Custom Key Bindings
+
+<CodeGroup>
+```json keymap.json (Complete)
+[
+  {
+    "context": "Editor && !VimControl",
+    "bindings": {
+      "ctrl-a": "editor::MoveToBeginningOfLine",
+      "ctrl-e": "editor::MoveToEndOfLine",
+      "ctrl-alt-f": "editor::MoveToNextWordEnd",
+      "ctrl-alt-b": "editor::MoveLeft",
+      "ctrl-p": "editor::MoveUp",
+      "ctrl-n": "editor::MoveDown",
+      "ctrl-o": "editor::NewlineBelow",
+      "ctrl-u": "editor::DeleteToBeginningOfLine",
+      "ctrl-k": "editor::DeleteToEndOfLine",
+    },
+  },
+  {
+    "context": "Editor && showing_completions && !VimControl",
+    "bindings": {
+      "ctrl-p": "editor::ContextMenuPrevious",
+      "ctrl-n": "editor::ContextMenuNext",
+    },
+  },
+]
+```
+</CodeGroup>
+
+### Emacs-Style Navigation
+
+These bindings work in insert mode (when Vim mode is not controlling the editor):
+
+<Tabs>
+  <Tab title="Movement">
+    | Key | Action | Emacs Equivalent |
+    |-----|--------|------------------|
+    | `Ctrl+A` | Move to beginning of line | ✓ |
+    | `Ctrl+E` | Move to end of line | ✓ |
+    | `Ctrl+P` | Move up one line | ✓ |
+    | `Ctrl+N` | Move down one line | ✓ |
+    | `Ctrl+Alt+F` | Move to next word end | Similar to `M-f` |
+    | `Ctrl+Alt+B` | Move left | Similar to `M-b` |
+  </Tab>
+
+  <Tab title="Editing">
+    | Key | Action | Emacs Equivalent |
+    |-----|--------|------------------|
+    | `Ctrl+O` | Insert newline below | Different from Emacs |
+    | `Ctrl+U` | Delete to beginning of line | ✓ |
+    | `Ctrl+K` | Delete to end of line | ✓ |
+  </Tab>
+
+  <Tab title="Completion">
+    | Key | Action | Context |
+    |-----|--------|----------|
+    | `Ctrl+P` | Previous completion | Completion menu open |
+    | `Ctrl+N` | Next completion | Completion menu open |
+    
+    When the autocomplete menu is showing, `Ctrl+P` and `Ctrl+N` navigate suggestions instead of moving lines.
+  </Tab>
+</Tabs>
+
+<Note>
+These Emacs-style bindings only activate when **not** in Vim control mode (i.e., in insert mode). This allows seamless switching between Vim modal editing and familiar Emacs navigation.
+</Note>
+
+## Installation
+
+The Zed configuration files are symlinked during setup:
+
+```bash
+mkdir -p "$HOME/.config/zed"
+ln -sf "$DOTFILES_DIR/zed/settings.json" "$HOME/.config/zed/settings.json"
+ln -sf "$DOTFILES_DIR/zed/keymap.json" "$HOME/.config/zed/keymap.json"
+```
+
+Changes to these files take effect immediately in Zed without needing to restart the editor.
+
+## Related Configuration
+
+- [Vim Configuration](/config/vim) - Traditional Vim editor setup
+- [Shell Configuration](/config/shell) - Terminal environment
+- [Starship Configuration](/config/starship) - Command prompt customization

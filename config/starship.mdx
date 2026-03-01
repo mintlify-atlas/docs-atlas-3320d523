@@ -1,0 +1,216 @@
+---
+title: Starship Prompt Configuration
+description: Minimal Starship prompt configuration with custom lambda character symbols
+---
+
+The Starship configuration customizes your command-line prompt with a minimal, elegant design using lambda symbols.
+
+## Overview
+
+This configuration:
+- Customizes the prompt character to use the lambda symbol (λ)
+- Shows green lambda for successful commands
+- Shows red lambda for failed commands
+- Maintains Starship's smart defaults for everything else
+
+## Configuration File
+
+```toml starship.toml
+[character]
+success_symbol = "[λ](bold green)"
+error_symbol = "[λ](bold red)"
+```
+
+## Prompt Character
+
+The `[character]` section customizes the prompt symbol that appears before your cursor.
+
+### Success Symbol
+
+```toml
+success_symbol = "[λ](bold green)"
+```
+
+When the previous command exits successfully (exit code 0), the prompt displays a **bold green lambda (λ)** symbol.
+
+```bash
+λ git status  # Previous command succeeded
+```
+
+### Error Symbol
+
+```toml
+error_symbol = "[λ](bold red)"
+```
+
+When the previous command fails (non-zero exit code), the prompt displays a **bold red lambda (λ)** symbol, providing immediate visual feedback.
+
+```bash
+λ cat nonexistent.txt
+cat: nonexistent.txt: No such file or directory
+λ # Red lambda indicates the error
+```
+
+<Note>
+The lambda (λ) symbol is commonly used in functional programming and mathematics, representing abstraction and functions. It's a popular choice for developer prompts due to its minimalist aesthetic.
+</Note>
+
+## Visual Examples
+
+<Tabs>
+  <Tab title="Successful Command">
+    ```bash
+    λ echo "Hello, World!"
+    Hello, World!
+    λ  # Green lambda
+    ```
+    
+    The green lambda indicates the `echo` command completed successfully.
+  </Tab>
+
+  <Tab title="Failed Command">
+    ```bash
+    λ false
+    λ  # Red lambda
+    ```
+    
+    The red lambda immediately shows that the previous command failed.
+  </Tab>
+
+  <Tab title="Command Chain">
+    ```bash
+    λ npm install  # Green after success
+    λ npm test     # Red if tests fail
+    λ npm test     # Green once tests pass
+    ```
+    
+    The color-coded prompt helps track command success in long workflows.
+  </Tab>
+</Tabs>
+
+## Default Features
+
+While this configuration only customizes the prompt character, Starship automatically provides:
+
+<CardGroup cols={2}>
+  <Card title="Git Integration" icon="git-alt">
+    Shows current branch, modified files, and repository status without additional configuration.
+  </Card>
+
+  <Card title="Language Versions" icon="code">
+    Displays versions for detected languages and tools (Node.js, Python, Ruby, etc.).
+  </Card>
+
+  <Card title="Directory Path" icon="folder">
+    Shows current directory with smart truncation for deep paths.
+  </Card>
+
+  <Card title="Execution Time" icon="clock">
+    Displays command execution time for long-running commands.
+  </Card>
+</CardGroup>
+
+## Minimal Philosophy
+
+This configuration follows a minimal approach:
+
+<AccordionGroup>
+  <Accordion title="Why only customize the character?">
+    Starship's defaults are excellent for most use cases. By only changing the prompt character, you get:
+    - All of Starship's intelligent context detection
+    - Automatic language and tool version display
+    - Git integration without manual configuration
+    - A unique personal touch with the lambda symbol
+  </Accordion>
+
+  <Accordion title="Why lambda (λ)?">
+    The lambda symbol:
+    - Is concise and doesn't take up much space
+    - Has cultural significance in programming (lambda calculus, anonymous functions)
+    - Looks clean and professional
+    - Is easily distinguishable from command output
+  </Accordion>
+
+  <Accordion title="Color significance">
+    - **Green**: Positive feedback, command succeeded
+    - **Red**: Alert, something failed and may need attention
+    - **Bold**: Makes the prompt character stand out from surrounding text
+  </Accordion>
+</AccordionGroup>
+
+## Customization Examples
+
+If you want to extend the configuration, here are some popular options:
+
+<CodeGroup>
+```toml Add Directory Truncation
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+```
+
+```toml Customize Git Display
+[git_branch]
+symbol = "🌱 "
+format = "on [$symbol$branch]($style) "
+```
+
+```toml Show Command Duration
+[cmd_duration]
+min_time = 500
+format = "took [$duration](bold yellow)"
+```
+
+```toml Add Username/Hostname
+[username]
+show_always = false
+format = "[$user]($style) in "
+
+[hostname]
+ssh_only = true
+format = "on [$hostname](bold red) "
+```
+</CodeGroup>
+
+## Installation
+
+The Starship configuration is symlinked during setup:
+
+```bash
+ln -sf "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+```
+
+Starship must also be initialized in your shell. See the [Shell Configuration](/config/shell) page:
+
+```bash
+eval "$(starship init zsh)"
+```
+
+## Testing Changes
+
+After modifying `starship.toml`, the changes take effect immediately in new shell sessions. To test in your current session:
+
+```bash
+# Reload shell configuration
+source ~/.zshrc
+
+# Or just start a new shell
+exec zsh
+```
+
+<Tip>
+Use `starship config` to quickly open the configuration file in your default editor.
+</Tip>
+
+## Full Documentation
+
+For complete Starship customization options, see the official documentation:
+- [Starship Configuration](https://starship.rs/config/) - All available modules and options
+- [Presets](https://starship.rs/presets/) - Pre-built configurations for different styles
+- [Advanced Config](https://starship.rs/advanced-config/) - Custom commands and conditional formatting
+
+## Related Configuration
+
+- [Shell Configuration](/config/shell) - Starship initialization in .zshrc
+- [Git Configuration](/config/git) - Git settings that enhance Starship's git module
+- [Zed Configuration](/config/zed) - Editor settings with integrated terminal

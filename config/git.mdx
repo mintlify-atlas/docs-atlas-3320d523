@@ -1,0 +1,154 @@
+---
+title: Git Configuration
+description: Git user settings, default branch configuration, and helpful command aliases
+---
+
+The Git configuration file (`.gitconfig`) defines your Git identity, default behaviors, and convenient command shortcuts.
+
+## Overview
+
+The configuration includes:
+- User identity settings
+- Default branch name
+- Global gitignore file
+- Helpful command aliases
+
+## Configuration File
+
+```ini .gitconfig
+[user]
+	email = maclong9@icloud.com
+	name = Mac
+[init]
+	defaultBranch = main
+[core]
+  excludesFile = "$HOME/.gitignore"
+[alias]
+	co = checkout
+	br = branch
+	st = status
+	lg = log --oneline --graph --decorate
+```
+
+## Sections
+
+### User Identity
+
+```ini
+[user]
+	email = maclong9@icloud.com
+	name = Mac
+```
+
+Defines your Git identity used in commit metadata. This information appears in commit history and is essential for attribution.
+
+<Note>
+You'll want to update these values with your own name and email address during setup.
+</Note>
+
+### Default Branch
+
+```ini
+[init]
+	defaultBranch = main
+```
+
+Sets the default branch name to `main` for new repositories. This aligns with GitHub's current default and industry best practices.
+
+### Global Exclude File
+
+```ini
+[core]
+  excludesFile = "$HOME/.gitignore"
+```
+
+References a global `.gitignore` file that applies to all Git repositories on your system. This is useful for ignoring OS-specific files and editor artifacts without polluting individual project `.gitignore` files.
+
+<Tip>
+Common entries include `.DS_Store` (macOS), `*.swp` (Vim), and `.idea/` (JetBrains IDEs).
+</Tip>
+
+### Aliases
+
+```ini
+[alias]
+	co = checkout
+	br = branch
+	st = status
+	lg = log --oneline --graph --decorate
+```
+
+Defines shortcuts for commonly used Git commands:
+
+<CardGroup cols={2}>
+  <Card title="git co" icon="code-branch">
+    Shortcut for `git checkout` - switch branches or restore files.
+    
+    ```bash
+    git co main
+    git co -b feature-branch
+    ```
+  </Card>
+
+  <Card title="git br" icon="code-fork">
+    Shortcut for `git branch` - list, create, or delete branches.
+    
+    ```bash
+    git br          # List branches
+    git br -d old   # Delete branch
+    ```
+  </Card>
+
+  <Card title="git st" icon="circle-info">
+    Shortcut for `git status` - show working tree status.
+    
+    ```bash
+    git st
+    ```
+  </Card>
+
+  <Card title="git lg" icon="timeline">
+    Enhanced `git log` with compact one-line format, branch graph, and decorations.
+    
+    ```bash
+    git lg
+    git lg -10  # Last 10 commits
+    ```
+  </Card>
+</CardGroup>
+
+## Usage Examples
+
+### Enhanced Log Visualization
+
+The `lg` alias is particularly useful for visualizing branch history:
+
+```bash
+$ git lg
+* a1b2c3d (HEAD -> main) Add new feature
+* d4e5f6g Update documentation
+*   h7i8j9k Merge branch 'feature-x'
+|\
+| * k9l0m1n Implement feature X
+|/
+* n2o3p4q Initial commit
+```
+
+The `--oneline` flag shows abbreviated commits, `--graph` displays branch structure, and `--decorate` shows branch and tag names.
+
+## Installation
+
+The Git configuration is symlinked during setup:
+
+```bash
+ln -sf "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
+```
+
+<Warning>
+Make sure to update the `[user]` section with your personal information before committing code.
+</Warning>
+
+## Related Configuration
+
+- [Shell Configuration](/config/shell) - Shell environment and prompt setup
+- [Vim Configuration](/config/vim) - Text editor settings

@@ -1,0 +1,118 @@
+---
+title: Introduction
+description: A streamlined macOS development environment with automated setup and curated dotfiles
+---
+
+## Welcome to mac9sb/config
+
+This is a personal macOS development environment configuration repository that provides an automated setup script and carefully curated dotfiles for a productive development workflow. The setup script handles everything from Xcode Command Line Tools installation to Homebrew package management, creating a consistent and reproducible development environment.
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Get started by installing the complete development environment
+  </Card>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Clone and run the setup script in minutes
+  </Card>
+  <Card
+    title="Configuration Files"
+    icon="gear"
+    href="/config/shell"
+  >
+    Explore the included dotfiles and customizations
+  </Card>
+  <Card
+    title="Troubleshooting"
+    icon="wrench"
+    href="/reference/troubleshooting"
+  >
+    Common issues and solutions
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Automated Setup Script
+
+The `setup.sh` script automates the entire macOS development environment setup process:
+
+- **Xcode Command Line Tools**: Automatically detects and installs if missing
+- **Config Repository Management**: Clones and manages dotfiles in `~/.config`
+- **Symbolic Link Management**: Automatically links dotfiles to your home directory
+- **Touch ID for sudo**: Enables Touch ID authentication for sudo commands
+- **Homebrew Installation**: Installs Homebrew package manager if not present
+- **Homebrew Bundle**: Installs all packages, casks, and Mac App Store apps from the Brewfile
+
+### Curated Development Tools
+
+The Brewfile includes a carefully selected set of development tools and applications:
+
+**Command Line Tools**
+- `deno` - Modern JavaScript/TypeScript runtime
+- `gh` - GitHub CLI for repository management
+- `starship` - Fast, customizable shell prompt
+- `mosh` - Mobile shell for better SSH connections
+- `fswatch` - File system monitoring utility
+- `mas` - Mac App Store command line interface
+
+**Applications**
+- Zed - Fast, collaborative code editor
+- Claude Code - AI-powered coding assistant
+- Codex - Development tools
+- CrossOver - Run Windows applications on macOS
+
+**Mac App Store Apps**
+- Professional creative suite (Final Cut Pro, Logic Pro, Motion, Compressor)
+- Productivity tools (Keynote, Pages, Numbers)
+- Xcode and development tools
+
+### Shell Configuration
+
+Customized Zsh configuration with:
+
+- Starship prompt integration for a modern, informative terminal experience
+- Homebrew environment setup
+- Local bin directory in PATH
+- Useful shell options (auto_cd, spell correction, history management)
+
+### Git Configuration
+
+Pre-configured Git settings including:
+
+- User information setup
+- Default branch set to `main`
+- Convenient aliases (co, br, st, lg)
+- Custom gitignore file support
+
+### Vim Configuration
+
+A minimal but powerful Vim setup with:
+
+- Syntax highlighting enabled
+- Smart indentation (2 spaces, expandtab)
+- Relative line numbers
+- Enhanced search (incremental, case-insensitive)
+- Fuzzy file finding with `**` path support
+- Markdown-specific settings (word wrap)
+
+## What Makes This Different
+
+This configuration prioritizes:
+
+1. **Automation**: One script to set up everything
+2. **Idempotency**: Safe to run multiple times without issues
+3. **Transparency**: Clear logging at every step
+4. **Simplicity**: Minimal configuration, maximum productivity
+5. **Reproducibility**: Consistent setup across fresh macOS installations
+
+## Getting Started
+
+Ready to set up your development environment? Head over to the [Installation](/installation) page to begin, or check out the [Quick Start](/quickstart) guide for a rapid setup walkthrough.

@@ -1,0 +1,215 @@
+---
+title: Setup Script Reference
+description: Detailed documentation of the setup.sh automation script and its functions
+---
+
+The `setup.sh` script automates the complete setup of a macOS development environment. It handles everything from cloning configuration files to installing software packages.
+
+## Overview
+
+The setup script performs these tasks in order:
+
+1. Ensures the config repository is cloned to `~/.config`
+2. Symlinks dotfiles from the config repo to your home directory
+3. Installs Xcode Command Line Tools if missing
+4. Enables Touch ID for sudo authentication
+5. Installs Homebrew if not present
+6. Runs `brew bundle` to install all packages from the Brewfile
+
+## Script Configuration
+
+The script uses these settings:
+
+```bash
+set -eu  # Exit on error, treat unset variables as errors
+```
+
+**Constants:**
+- `CONFIG_REPO_URL`: `https://github.com/mac9sb/config.git`
+- `CONFIG_DIR`: `$HOME/.config`
+
+## Utility Functions
+
+### log()
+
+Logs informational messages with timestamps.
+
+**Location:** setup.sh:4-7
+
+**Signature:**
+```bash
+log() {
+  level="${2:-INFO}"
+  printf "%s [%s] %s\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$level" "$1"
+}
+```
+
+**Parameters:**
+- `$1`: Message to log
+- `$2`: Log level (default: "INFO")
+
+**Output format:** `2026-03-01T10:30:45-0800 [INFO] Starting macOS setup`
+
+### die()
+
+Logs an error message and exits the script with status code 1.
+
+**Location:** setup.sh:9-12
+
+**Signature:**
+```bash
+die() {
+  log "$*" "ERROR"
+  exit 1
+}
+```
+
+**Parameters:**
+- `$*`: Error message to log
+
+**Usage:** Called when a fatal error occurs that prevents the script from continuing.
+
+### warn()
+
+Logs a warning message without stopping script execution.
+
+**Location:** setup.sh:14-16
+
+**Signature:**
+```bash
+warn() {
+  log "$*" "WARN"
+}
+```
+
+**Parameters:**
+- `$*`: Warning message to log
+
+**Usage:** Used for non-fatal issues that should be brought to user attention.
+
+## Core Functions
+
+### ensure_config_repo()
+
+Clones the config repository to `~/.config` if not already present.
+
+**Location:** setup.sh:24-36
+
+**Behavior:**
+- If `~/.config/.git` exists, assumes repo is already present and returns
+- If `~/.config` exists but is not a git repo, exits with error
+- Otherwise, clones the repository from GitHub
+
+**Error handling:** Dies if `~/.config` exists but is not a git repository.
+
+### symlink_home_dotfiles()
+
+Creates symbolic links from dotfiles in `~/.config` to the home directory.
+
+**Location:** setup.sh:39-49
+
+**Behavior:**
+- Iterates through all hidden files (`.` prefix) in `~/.config`
+- Skips `.`, `..`, and `.git`
+- Creates symlinks using `ln -sf` (force overwrites existing files)
+
+**Example:** If `~/.config/.zshrc` exists, creates `~/.zshrc` pointing to it.
+
+### install_xcode_clt()
+
+Installs Xcode Command Line Tools if not already present.
+
+**Location:** setup.sh:52-62
+
+**Behavior:**
+- Checks if CLT is installed using `xcode-select -p`
+- If missing, triggers the GUI installation prompt
+- Exits with status 0 and asks user to re-run after installation completes
+
+**Special note:** This function exits the script if installation is needed, requiring the user to manually re-run `setup.sh` after the GUI installation finishes.
+
+### enable_touchid_for_sudo()
+
+Configures Touch ID authentication for sudo commands.
+
+**Location:** setup.sh:65-86
+
+**Behavior:**
+- Checks for `/etc/pam.d/sudo_local.template`
+- If target file already has Touch ID enabled, skips
+- Copies template to `/etc/pam.d/sudo_local`
+- Uncomments the `pam_tid.so` line using sed
+
+**Requirements:** Requires sudo privileges to modify `/etc/pam.d/sudo_local`.
+
+**Error handling:** If modification fails, logs a warning but continues execution.
+
+### install_brew_if_missing()
+
+Installs Homebrew if not already present on the system.
+
+**Location:** setup.sh:89-97
+
+**Behavior:**
+- Checks if `brew` command is available
+- If missing, downloads and runs the official Homebrew installation script
+
+**Installation source:** `https://brew.sh/install`
+
+### brew_bundle()
+
+Runs `brew bundle` to install all packages defined in the Brewfile.
+
+**Location:** setup.sh:100-111
+
+**Behavior:**
+- Changes to `$CONFIG_DIR` directory
+- Verifies Brewfile exists
+- Sources Homebrew shell environment
+- Executes `brew bundle` to install all packages
+
+**Error handling:** If Brewfile is missing, logs a warning and skips installation.
+
+## Execution Flow
+
+The main execution block (setup.sh:114-121) runs these functions in order:
+
+```bash
+log "Starting macOS setup"
+ensure_config_repo
+symlink_home_dotfiles
+install_xcode_clt
+enable_touchid_for_sudo
+install_brew_if_missing
+brew_bundle
+log "Done ✅"
+```
+
+## Error Handling Strategy
+
+The script uses several error handling approaches:
+
+1. **Fatal errors:** Use `die()` to log and exit (e.g., wrong OS, conflicting paths)
+2. **Non-fatal warnings:** Use `warn()` for issues that don't prevent continuation
+3. **Early returns:** Functions check if work is already done and return early
+4. **Set flags:** `set -eu` ensures the script exits on any command failure or undefined variable
+
+## Platform Check
+
+Before any operations, the script verifies it's running on macOS:
+
+```bash
+[ "$(uname -s)" = "Darwin" ] || die "This script is macOS-only."
+```
+
+This prevents accidental execution on Linux or other Unix systems.
+
+## Logging Format
+
+All log messages use ISO 8601 timestamp format with timezone:
+
+```
+2026-03-01T10:30:45-0800 [INFO] Starting macOS setup
+2026-03-01T10:30:46-0800 [WARN] Brewfile not found
+2026-03-01T10:30:47-0800 [ERROR] This script is macOS-only.
+```

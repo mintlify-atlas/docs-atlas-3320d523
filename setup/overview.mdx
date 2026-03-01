@@ -1,0 +1,142 @@
+---
+title: Setup Overview
+description: Automated macOS development environment setup process
+---
+
+The setup script automates the configuration of your macOS development environment by installing essential tools, configuring system settings, and symlinking dotfiles.
+
+## What Gets Configured
+
+The setup process handles:
+
+- **Config Repository**: Clones your dotfiles to `~/.config`
+- **Dotfile Symlinking**: Links configuration files to your home directory
+- **Xcode Command Line Tools**: Installs developer tools required by Homebrew
+- **Touch ID for sudo**: Enables biometric authentication for sudo commands
+- **Homebrew**: Installs the package manager for macOS
+- **Homebrew Bundle**: Installs all packages, casks, and Mac App Store apps
+
+## Running the Setup
+
+The setup script can be run with a single command:
+
+```bash
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/mac9sb/config/main/setup.sh)"
+```
+
+<Note>
+The script is idempotent - you can run it multiple times safely. It checks for existing installations and skips steps that are already complete.
+</Note>
+
+## Setup Flow
+
+<Steps>
+  <Step title="macOS Validation">
+    The script verifies it's running on macOS by checking `uname -s`.
+    
+    ```sh
+    [ "$(uname -s)" = "Darwin" ] || die "This script is macOS-only."
+    ```
+  </Step>
+
+  <Step title="Config Repository">
+    Clones `https://github.com/mac9sb/config.git` to `~/.config` if not already present.
+    
+    ```sh
+    if [ -d "$CONFIG_DIR/.git" ]; then
+      log "Config repo: already present at $CONFIG_DIR"
+      return 0
+    fi
+    
+    log "Cloning config repo into $CONFIG_DIR"
+    git clone "$CONFIG_REPO_URL" "$CONFIG_DIR"
+    ```
+  </Step>
+
+  <Step title="Symlink Dotfiles">
+    Creates symbolic links from `~/.config/.*` files to your home directory.
+    
+    ```sh
+    for file in "$CONFIG_DIR"/.*; do
+      [ -f "$file" ] || continue
+      filename="$(basename "$file")"
+      case "$filename" in
+      . | ..) continue ;;
+      .git) continue ;;
+      *) ln -sf "$file" "$HOME/$filename" ;;
+      esac
+    done
+    ```
+  </Step>
+
+  <Step title="Xcode Command Line Tools">
+    Installs Xcode CLT if not present. This step may require user interaction.
+    
+    ```sh
+    if xcode-select -p >/dev/null 2>&1; then
+      log "Xcode Command Line Tools: already installed"
+      return 0
+    fi
+    
+    log "Installing Xcode Command Line Tools (a GUI prompt will appear)..."
+    xcode-select --install >/dev/null 2>&1 || true
+    log "Re-run this script after the CLT installation finishes."
+    exit 0
+    ```
+  </Step>
+
+  <Step title="Touch ID Configuration">
+    Enables Touch ID for sudo authentication using `/etc/pam.d/sudo_local`.
+    
+    See [Touch ID for sudo](/setup/touchid) for details.
+  </Step>
+
+  <Step title="Homebrew Installation">
+    Installs Homebrew if not already present.
+    
+    See [Homebrew Setup](/setup/homebrew) for details.
+  </Step>
+
+  <Step title="Homebrew Bundle">
+    Installs all packages, casks, and Mac App Store apps from the Brewfile.
+    
+    See [Homebrew Bundle](/setup/homebrew#bundle-installation) for the complete list.
+  </Step>
+</Steps>
+
+## Logging
+
+The script uses structured logging with timestamps and log levels:
+
+```sh
+log() {
+  level="${2:-INFO}"
+  printf "%s [%s] %s\n" "$(date +'%Y-%m-%dT%H:%M:%S%z')" "$level" "$1"
+}
+```
+
+Log levels used:
+- `INFO` - Normal operation messages
+- `WARN` - Non-fatal issues
+- `ERROR` - Fatal errors that stop execution
+
+<Info>
+The script uses `set -eu` to fail fast on errors and undefined variables, ensuring setup problems are caught early.
+</Info>
+
+## Error Handling
+
+The script includes helper functions for error handling:
+
+```sh
+die() {
+  log "$*" "ERROR"
+  exit 1
+}
+
+warn() {
+  log "$*" "WARN"
+}
+```
+
+Fatal errors (like running on non-macOS systems) use `die()`, while non-critical failures (like Touch ID configuration issues) use `warn()` and continue.

@@ -1,0 +1,163 @@
+---
+title: Touch ID for sudo
+description: Configure Touch ID for biometric sudo authentication on macOS
+---
+
+The setup script enables Touch ID for sudo authentication, allowing you to use your fingerprint instead of typing your password for privileged commands.
+
+## How It Works
+
+The implementation uses macOS's PAM (Pluggable Authentication Modules) system, specifically the `sudo_local` configuration file:
+
+```sh
+enable_touchid_for_sudo() {
+  template="/etc/pam.d/sudo_local.template"
+  target="/etc/pam.d/sudo_local"
+
+  if [ ! -f "$template" ]; then
+    log "Touch ID: $template not found; skipping"
+    return 0
+  fi
+
+  if [ -f "$target" ] && grep -q '^[[:space:]]*auth[[:space:]]\+sufficient[[:space:]]\+pam_tid\.so' "$target" 2>/dev/null; then
+    log "Touch ID: already enabled (sudo_local)"
+    return 0
+  fi
+
+  log "Enabling Touch ID for sudo (requires sudo)..."
+  if sudo cp "$template" "$target" &&
+    sudo sed -i "" "s/^[[:space:]]*#auth[[:space:]]\\+sufficient[[:space:]]\\+pam_tid\\.so/auth       sufficient     pam_tid.so/" "$target"; then
+    log "Touch ID: enabled successfully"
+  else
+    warn "Touch ID modification failed (continuing)"
+  fi
+}
+```
+
+## Configuration Process
+
+<Steps>
+  <Step title="Check for template file">
+    The script first checks if `/etc/pam.d/sudo_local.template` exists.
+    
+    ```sh
+    if [ ! -f "$template" ]; then
+      log "Touch ID: $template not found; skipping"
+      return 0
+    fi
+    ```
+    
+    <Info>
+    Apple provides this template file on modern macOS versions. If it doesn't exist, the configuration is skipped gracefully.
+    </Info>
+  </Step>
+
+  <Step title="Check if already configured">
+    Before making changes, the script checks if Touch ID is already enabled:
+    
+    ```sh
+    if [ -f "$target" ] && grep -q '^[[:space:]]*auth[[:space:]]\+sufficient[[:space:]]\+pam_tid\.so' "$target" 2>/dev/null; then
+      log "Touch ID: already enabled (sudo_local)"
+      return 0
+    fi
+    ```
+    
+    This makes the script idempotent - safe to run multiple times.
+  </Step>
+
+  <Step title="Copy template to target">
+    The template is copied to create the active configuration file:
+    
+    ```sh
+    sudo cp "$template" "$target"
+    ```
+    
+    This creates `/etc/pam.d/sudo_local` from the template.
+  </Step>
+
+  <Step title="Uncomment pam_tid.so line">
+    The script uses `sed` to uncomment the Touch ID authentication line:
+    
+    ```sh
+    sudo sed -i "" "s/^[[:space:]]*#auth[[:space:]]\\+sufficient[[:space:]]\\+pam_tid\\.so/auth       sufficient     pam_tid.so/" "$target"
+    ```
+    
+    This activates the `pam_tid.so` module which handles Touch ID authentication.
+  </Step>
+</Steps>
+
+## Why sudo_local?
+
+Using `/etc/pam.d/sudo_local` instead of modifying `/etc/pam.d/sudo` directly is the recommended approach because:
+
+- **Update-safe**: macOS system updates may overwrite `/etc/pam.d/sudo`, but `sudo_local` persists across updates
+- **Apple-provided**: The `sudo_local.template` is provided by Apple specifically for user customizations
+- **Clean separation**: Keeps custom authentication methods separate from system defaults
+
+<Warning>
+This configuration requires sudo privileges to modify PAM configuration files. You'll need to enter your password when the script reaches this step.
+</Warning>
+
+## What Gets Configured
+
+The uncommented line in `/etc/pam.d/sudo_local` will look like:
+
+```
+auth       sufficient     pam_tid.so
+```
+
+This tells the PAM system:
+- **auth**: This is an authentication module
+- **sufficient**: If Touch ID succeeds, no further authentication is needed
+- **pam_tid.so**: Use the Touch ID PAM module
+
+## Error Handling
+
+The script handles failures gracefully:
+
+```sh
+if sudo cp "$template" "$target" &&
+  sudo sed -i "" "s/^[[:space:]]*#auth[[:space:]]\\+sufficient[[:space:]]\\+pam_tid\\.so/auth       sufficient     pam_tid.so/" "$target"; then
+  log "Touch ID: enabled successfully"
+else
+  warn "Touch ID modification failed (continuing)"
+fi
+```
+
+If Touch ID configuration fails, the script:
+- Logs a warning
+- Continues with the rest of the setup
+- Does not stop the entire setup process
+
+<Note>
+Touch ID configuration is considered non-critical. If it fails, you can still use traditional password authentication for sudo commands.
+</Note>
+
+## Testing
+
+After setup completes, test Touch ID for sudo:
+
+```bash
+sudo echo "Touch ID works!"
+```
+
+You should see a Touch ID prompt instead of a password prompt.
+
+## Manual Configuration
+
+If you need to configure Touch ID manually:
+
+```bash
+sudo cp /etc/pam.d/sudo_local.template /etc/pam.d/sudo_local
+sudo sed -i "" "s/^[[:space:]]*#auth[[:space:]]\\+sufficient[[:space:]]\\+pam_tid\\.so/auth       sufficient     pam_tid.so/" /etc/pam.d/sudo_local
+```
+
+## Disabling Touch ID
+
+To disable Touch ID for sudo:
+
+```bash
+sudo rm /etc/pam.d/sudo_local
+```
+
+This removes the custom PAM configuration and reverts to password-only authentication.
