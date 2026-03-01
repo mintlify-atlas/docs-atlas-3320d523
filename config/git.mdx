@@ -64,9 +64,26 @@ Sets the default branch name to `main` for new repositories. This aligns with Gi
 
 References a global `.gitignore` file that applies to all Git repositories on your system. This is useful for ignoring OS-specific files and editor artifacts without polluting individual project `.gitignore` files.
 
-<Tip>
-Common entries include `.DS_Store` (macOS), `*.swp` (Vim), and `.idea/` (JetBrains IDEs).
-</Tip>
+The `.gitignore` file includes:
+
+```gitignore
+*.DS_Store
+*.{swp,swo}
+gh
+github-copilot/
+node_modules/
+zed/prompts/
+zed/themes/
+```
+
+**What's Ignored:**
+- `*.DS_Store` - macOS directory metadata files
+- `*.{swp,swo}` - Vim temporary and swap files
+- `gh` - GitHub CLI binary (if locally built)
+- `github-copilot/` - GitHub Copilot cache directory
+- `node_modules/` - Node.js dependencies
+- `zed/prompts/` - Zed editor custom prompts
+- `zed/themes/` - Zed editor custom themes
 
 ### Aliases
 
